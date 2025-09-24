@@ -1,0 +1,90 @@
+﻿@model Event_Management_And_Ticket_Booking_System.Models.Event
+
+@{
+    ViewData["Title"] = "Update Event";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0">Edit Event</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="UpdateEvent" enctype="multipart/form-data" method="post">
+                        <input type="hidden" asp-for="EventId" />
+
+                        <div class="mb-3">
+                            <label asp-for="Title" class="form-label"></label>
+                            <input asp-for="Title" class="form-control" />
+                            <span asp-validation-for="Title" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="EventDescription" class="form-label"></label>
+                            <textarea asp-for="EventDescription" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="EventDescription" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="CategoryId" class="form-label">Category</label>
+                            <select asp-for="CategoryId" asp-items="ViewBag.CategoryList" class="form-select">
+                                <option value="">-- Select Category --</option>
+                            </select>
+                            <span asp-validation-for="CategoryId" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="EventLocation" class="form-label"></label>
+                            <input asp-for="EventLocation" class="form-control" />
+                            <span asp-validation-for="EventLocation" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="EventStartUtc" class="form-label">Start Date</label>
+                                <input asp-for="EventStartUtc" type="datetime-local" class="form-control" />
+                                <span asp-validation-for="EventStartUtc" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="EventEndUtc" class="form-label">End Date</label>
+                                <input asp-for="EventEndUtc" type="datetime-local" class="form-control" />
+                                <span asp-validation-for="EventEndUtc" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Current Banner</label><br />
+                            @if (!string.IsNullOrEmpty(Model.BannerImagePath))
+                            {
+                                <img src="@Model.BannerImagePath" class="img-thumbnail mb-2" style="max-height:200px;" />
+                            }
+                            else
+                            {
+                                <p class="text-muted">No banner uploaded</p>
+                            }
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Upload New Banner</label>
+                            <input type="file" name="file" class="form-control" />
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Update Event</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer text-muted small">
+                    Created @Model.CreatedAt.ToString("g")
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

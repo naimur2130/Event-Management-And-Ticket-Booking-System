@@ -1,0 +1,153 @@
+﻿@model IEnumerable<Event_Management_And_Ticket_Booking_System.Models.Event>
+
+@{
+    ViewData["Title"] = "My Events";
+}
+
+<style>
+    body {
+        background: linear-gradient(135deg, #e0f7fa 0%, #ffffff 100%);
+        min-height: 100vh;
+        font-family: "Segoe UI", sans-serif;
+    }
+
+    .container {
+        padding-top: 40px;
+        padding-bottom: 40px;
+    }
+
+    .add-event-btn {
+        margin-bottom: 30px;
+    }
+
+    .event-card {
+        border: none;
+        border-radius: 16px;
+        overflow: hidden;
+        background: #ffffff;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .event-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.12);
+        }
+
+        .event-card .card-img-top {
+            height: 200px;
+            object-fit: cover;
+        }
+
+    .badge-soft {
+        background: rgba(13, 110, 253, 0.15);
+        color: #0d6efd;
+        font-weight: 500;
+        padding: 0.35rem 0.7rem;
+        border-radius: 0.5rem;
+        font-size: 0.85rem;
+    }
+
+    .chip {
+        display: inline-block;
+        padding: .35rem .6rem;
+        border-radius: 999px;
+        font-size: .85rem;
+        font-weight: 600;
+    }
+
+    .chip-published {
+        background: rgba(25, 135, 84, .12);
+        color: #198754;
+    }
+
+    .chip-cancelled {
+        background: rgba(220, 53, 69, .12);
+        color: #dc3545;
+    }
+
+    .chip-draft {
+        background: rgba(108, 117, 125, .12);
+        color: #6c757d;
+    }
+
+    .event-card .card-footer {
+        background: #f8f9fa;
+        border-top: 1px solid #e9ecef;
+        font-size: 0.85rem;
+    }
+
+    .event-actions .btn {
+        margin-right: 0.35rem;
+    }
+</style>
+
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2>My Events</h2>
+            <p class="text-muted mb-0">Create, manage and track your events in one place.</p>
+        </div>
+        <a href="@Url.Action("AddEvents", "Event", new { area = "OrganizerArea" })" class="btn btn-primary add-event-btn">
+            + Add Event
+        </a>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info text-center shadow-sm">
+            You haven't created any events yet.
+            <a href="@Url.Action("AddEvents", "Event", new { area = "OrganizerArea" })" class="btn btn-primary btn-sm ms-2">Create Event</a>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var item in Model)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card event-card h-100">
+                        <img src="@(string.IsNullOrEmpty(item.BannerImagePath) ? "~/images/no-image.png" : item.BannerImagePath)"
+                             class="card-img-top" alt="@item.Title" />
+
+                        <div class="card-body d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title mb-0">@item.Title</h5>
+                                <span class="badge badge-soft">@item.EventCategory?.CategoryName ?? "N/A"</span>
+                            </div>
+
+                            <p class="card-text text-muted" title="@item.EventDescription">
+                                @item.EventDescription
+                            </p>
+
+                            <ul class="list-unstyled small mb-3">
+                                <li><i class="bi bi-geo-alt me-1"></i>@item.EventLocation</li>
+                                <li><strong>Start:</strong> @item.EventStartUtc:g</li>
+                                <li><strong>End:</strong> @item.EventEndUtc:g</li>
+                            </ul>
+
+                            @{
+                                var statusClass =
+                                item.Status == Event_Management_And_Ticket_Booking_System.Models.EventStatus.Published ? "chip chip-published" :
+                                item.Status == Event_Management_And_Ticket_Booking_System.Models.EventStatus.Cancelled ? "chip chip-cancelled" :
+                                "chip chip-draft";
+                            }
+                            <div class="mb-3">
+                                <span class="@statusClass">@item.Status</span>
+                            </div>
+
+                            <div class="mt-auto event-actions">
+                                <a href="@Url.Action("UpdateEvent", "Event", new { area = "OrganizerArea", id = item.EventId })" class="btn btn-warning btn-sm">Edit</a>
+                                <a href="@Url.Action("Delete", "Event", new { area = "OrganizerArea", id = item.EventId })" class="btn btn-danger btn-sm">Delete</a>
+                            </div>
+                        </div>
+
+                        <div class="card-footer text-muted small">
+                            Created @item.CreatedAt:g
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

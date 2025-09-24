@@ -1,0 +1,53 @@
+﻿@model IEnumerable<Event_Management_And_Ticket_Booking_System.Models.EventCategory>
+
+@{
+    ViewData["Title"] = "Category List";
+}
+
+<!-- Page wrapper with soft gradient background -->
+<div class="min-vh-100" style="background: linear-gradient(135deg, #fef9f3 0%, #fcefd3 100%); padding-top: 50px; padding-bottom: 50px;">
+
+    <div class="container">
+        <div class="card shadow-lg rounded-4 p-4">
+            <h2 class="card-title text-center mb-4 text-primary">Category List</h2>
+
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th scope="col">Category Name</th>
+                            <th scope="col">Description</th>
+                            <th scope="col" class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@item.CategoryName</td>
+                                    <td>@item.CategoryDescription</td>
+                                    <td class="text-center">
+                                        <a asp-action="Edit" asp-route-id="@item.CategoryId" class="btn btn-sm btn-warning me-1">Edit</a>
+                                        <a asp-action="Delete" asp-route-id="@item.CategoryId" class="btn btn-sm btn-danger">Delete</a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="3" class="text-center text-muted">No categories available.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="text-center mt-3">
+                <a asp-action="Create" class="btn btn-primary btn-lg">+ Add New Category</a>
+            </div>
+        </div>
+    </div>
+</div>
