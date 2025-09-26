@@ -1,0 +1,145 @@
+﻿@model Event_Management_And_Ticket_Booking_System.Models.Event
+
+@{
+    ViewData["Title"] = "Add New Event";
+}
+
+<style>
+    body {
+        background: linear-gradient(135deg, #f0f4ff, #e6f7ff);
+        min-height: 100vh;
+    }
+
+    .event-card {
+        background-color: #ffffff;
+        border-radius: 15px;
+        box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+        .event-card .card-header {
+            background: linear-gradient(90deg, #007bff, #00c6ff);
+            font-weight: 600;
+            font-size: 1.25rem;
+            padding: 1rem;
+        }
+
+    .form-control,
+    .form-select {
+        border-radius: 8px;
+        border: 1px solid #d1d9e6;
+        padding: 10px 12px;
+    }
+
+    .btn-gradient {
+        background: linear-gradient(90deg, #28a745, #20c997);
+        color: white;
+        font-weight: 500;
+        border-radius: 10px;
+        transition: 0.3s ease-in-out;
+    }
+
+        .btn-gradient:hover {
+            background: linear-gradient(90deg, #20c997, #28a745);
+            transform: scale(1.05);
+        }
+
+    .btn-cancel {
+        background-color: #6c757d;
+        border-radius: 10px;
+        font-weight: 500;
+        color: white;
+        transition: 0.3s ease-in-out;
+    }
+
+        .btn-cancel:hover {
+            background-color: #5a6268;
+            transform: scale(1.05);
+        }
+</style>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="event-card">
+                <div class="card-header text-white text-center">
+                    <i class="bi bi-calendar-plus me-2"></i> Create New Event
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="AddEvents" enctype="multipart/form-data" method="post">
+
+                        <div class="mb-3">
+                            <label asp-for="Title" class="form-label fw-semibold"></label>
+                            <input asp-for="Title" class="form-control" placeholder="Enter event title..." />
+                            <span asp-validation-for="Title" class="text-danger"></span>
+                        </div>
+
+
+                        <div class="mb-3">
+                            <label asp-for="EventDescription" class="form-label fw-semibold"></label>
+                            <textarea asp-for="EventDescription" class="form-control" rows="3" placeholder="Describe your event..."></textarea>
+                            <span asp-validation-for="EventDescription" class="text-danger"></span>
+                        </div>
+
+
+                        <div class="mb-3">
+                            <label asp-for="CategoryId" class="form-label fw-semibold">Category</label>
+                            <select asp-for="CategoryId" asp-items="ViewBag.CategoryList" class="form-select">
+                                <option value="">-- Select Category --</option>
+                            </select>
+                            <span asp-validation-for="CategoryId" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="MaxAttendees" class="form-label fw-semibold">Maximum Attendees</label>
+                            <input asp-for="MaxAttendees" type="number" class="form-control" placeholder="Enter max attendees..." min="1" />
+                            <span asp-validation-for="MaxAttendees" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="EventLocation" class="form-label fw-semibold"></label>
+                            <input asp-for="EventLocation" class="form-control" placeholder="Enter event location..." />
+                            <span asp-validation-for="EventLocation" class="text-danger"></span>
+                        </div>
+
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="EventStartUtc" class="form-label fw-semibold">Start Date</label>
+                                <input asp-for="EventStartUtc" type="datetime-local" class="form-control" />
+                                <span asp-validation-for="EventStartUtc" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="EventEndUtc" class="form-label fw-semibold">End Date</label>
+                                <input asp-for="EventEndUtc" type="datetime-local" class="form-control" />
+                                <span asp-validation-for="EventEndUtc" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Slug" class="form-label fw-semibold"></label>
+                            <input asp-for="Slug" class="form-control" placeholder="Optional SEO slug..." />
+                            <span asp-validation-for="Slug" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Upload Banner</label>
+                            <input type="file" name="file" class="form-control" />
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a asp-action="Index" class="btn btn-cancel px-4">Cancel</a>
+                            <button type="submit" class="btn btn-gradient px-4">Create Event</button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+

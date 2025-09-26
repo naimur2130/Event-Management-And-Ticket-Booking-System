@@ -1,0 +1,99 @@
+﻿@model IEnumerable<Event_Management_And_Ticket_Booking_System.Models.Event>
+
+@{
+    ViewData["Title"] = "Pending Event Approvals";
+}
+
+<div class="container py-5">
+    <h2 class="text-center mb-4 text-primary">Pending Event Approvals</h2>
+
+    @if (TempData["success"] != null)
+    {
+        <div class="alert alert-success text-center">
+            @TempData["success"]
+        </div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info text-center">
+            <i class="bi bi-info-circle"></i> No pending approval requests.
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var ev in Model)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden">
+
+                        <!-- Banner -->
+                        @if (!string.IsNullOrEmpty(ev.BannerImagePath))
+                        {
+                            <img src="@ev.BannerImagePath" class="card-img-top" style="height: 200px; object-fit: cover;" alt="Event Banner" />
+                        }
+                        else
+                        {
+                            <div class="bg-light d-flex align-items-center justify-content-center" style="height:200px;">
+                                <i class="bi bi-image text-muted" style="font-size: 2rem;"></i>
+                            </div>
+                        }
+
+                        <!-- Card Body -->
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title fw-bold text-dark">@ev.Title</h5>
+
+                            <!-- Organizer Info -->
+                            <p class="small text-muted mb-1">
+                                <i class="bi bi-person-circle"></i> @ev.User?.UserName
+                            </p>
+
+                            <!-- Category -->
+                            <p class="text-muted mb-1">
+                                <i class="bi bi-tags"></i> @ev.EventCategory?.CategoryName
+                            </p>
+
+                            <!-- Dates -->
+                            <p class="small text-muted mb-1">
+                                <i class="bi bi-calendar-event"></i>
+                                @ev.EventStartUtc.ToString("dd MMM yyyy, hh:mm tt") –
+                                @ev.EventEndUtc.ToString("dd MMM yyyy, hh:mm tt")
+                            </p>
+
+                            <!-- Location -->
+                            <p class="mb-2">
+                                <i class="bi bi-geo-alt text-danger"></i> @ev.EventLocation
+                            </p>
+
+                            <!-- Description -->
+                            <p class="card-text text-truncate" style="max-height: 3.6em; overflow: hidden;">
+                                @ev.EventDescription
+                            </p>
+
+                            <!-- Actions -->
+                            <div class="mt-auto d-flex justify-content-between">
+                                <form asp-action="Approve" asp-route-id="@ev.EventId" method="post" class="me-2">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-success btn-sm w-100">
+                                        <i class="bi bi-check-circle"></i> Approve
+                                    </button>
+                                </form>
+                                <form asp-action="Reject" asp-route-id="@ev.EventId" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-danger btn-sm w-100">
+                                        <i class="bi bi-x-circle"></i> Reject
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="card-footer bg-light small text-muted">
+                            Requested on: @ev.CreatedAt.ToString("dd MMM yyyy")
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

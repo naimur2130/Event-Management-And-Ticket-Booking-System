@@ -34,7 +34,22 @@
                                 <a class="nav-link text-dark" asp-area="OrganizerArea" asp-controller="Category" asp-action="Index">Manage Categories</a>
                             </li>
                         }
-)
+                        @if (User.IsInRole("Attendee"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="AttendeeArea" asp-controller="Event" asp-action="Index">Build Your own</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="AttendeeArea" asp-controller="Event" asp-action="ShowEvents">Our Events</a>
+                            </li>
+                        }
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="AdminArea" asp-controller="Approval" asp-action="Index">Build Your own</a>
+                            </li>
+                            
+                        }
                     </ul>
                     <partial name="_LoginPartial" />
                 </div>

@@ -17,7 +17,7 @@ namespace Event_Management_And_Ticket_Booking_System.Models
     public enum EventCreatedByType
     {
         Organizer = 0,
-        Customer = 1
+        Attendee = 1
     }
     public class Event
     {
