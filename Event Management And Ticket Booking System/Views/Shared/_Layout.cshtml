@@ -7,48 +7,121 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Event_Management_And_Ticket_Booking_System.styles.css" asp-append-version="true" />
+
+    <style>
+        body {
+            font-family: "Segoe UI", sans-serif;
+            background: linear-gradient(135deg, #eef2f3 0%, #ffffff 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: #0d6efd !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .navbar-brand, .nav-link {
+            color: #fff !important;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+            .nav-link:hover {
+                color: #ffdd57 !important;
+            }
+
+        /* Main container */
+        main {
+            flex: 1;
+            padding: 20px;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        /* Footer */
+        footer {
+            background: #0d6efd;
+            color: #fff;
+            padding: 15px 0;
+            text-align: center;
+        }
+
+            footer a {
+                color: #ffdd57;
+                text-decoration: none;
+            }
+
+                footer a:hover {
+                    text-decoration: underline;
+                }
+
+        /* Button Hover */
+        .btn {
+            transition: all 0.3s ease;
+        }
+
+            .btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+            }
+
+        /* Page fade-in animation */
+        @@keyframes fadeIn {
+            from{
+            opacity: 0;
+            transform: translateY(5px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        }
+    </style>
+
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Event_Management_And_Ticket_Booking_System</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+                <a class="navbar-brand fw-bold" asp-area="" asp-controller="Home" asp-action="Index">
+                    Event System
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
-                        @if(User.IsInRole("Organizer"))
+                        @if (User.IsInRole("Organizer"))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="OrganizerArea" asp-controller="Event" asp-action="Index">Manage Events</a>
+                                <a class="nav-link" asp-area="OrganizerArea" asp-controller="Event" asp-action="Index">Manage Events</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="OrganizerArea" asp-controller="Category" asp-action="Index">Manage Categories</a>
+                                <a class="nav-link" asp-area="OrganizerArea" asp-controller="Category" asp-action="Index">Manage Categories</a>
                             </li>
                         }
                         @if (User.IsInRole("Attendee"))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="AttendeeArea" asp-controller="Event" asp-action="Index">Build Your own</a>
+                                <a class="nav-link" asp-area="AttendeeArea" asp-controller="Event" asp-action="Index">Build Your Own</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="AttendeeArea" asp-controller="Event" asp-action="ShowEvents">Our Events</a>
+                                <a class="nav-link" asp-area="AttendeeArea" asp-controller="Event" asp-action="ShowEvents">Our Events</a>
                             </li>
                         }
                         @if (User.IsInRole("Admin"))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="AdminArea" asp-controller="Approval" asp-action="Index">Build Your own</a>
+                                <a class="nav-link" asp-area="AdminArea" asp-controller="Approval" asp-action="Index">Build Your Own</a>
                             </li>
-                            
                         }
                     </ul>
                     <partial name="_LoginPartial" />
@@ -62,11 +135,13 @@
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
+    <footer>
         <div class="container">
-            &copy; 2025 - Event_Management_And_Ticket_Booking_System - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2025 - Event_Management_And_Ticket_Booking_System -
+            <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

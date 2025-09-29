@@ -11,6 +11,9 @@ namespace Event_Management_And_Ticket_Booking_System.Data
 
         public DbSet<Event> Event { get; set; }
         public DbSet<EventCategory> EventCategory { get; set; }
+        public DbSet<Booking> Booking { get; set; }
+        public DbSet<Tickets> Tickets { get; set; }
+        public DbSet<TempAttendees> TempAttendees { get; set; } 
 
     }
 }

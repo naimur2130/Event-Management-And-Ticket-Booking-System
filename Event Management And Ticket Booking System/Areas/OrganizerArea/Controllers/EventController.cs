@@ -50,13 +50,22 @@ namespace Event_Management_And_Ticket_Booking_System.Areas.OrganizerArea.Control
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddEvents(Event events, IFormFile? file)
         {
+            if (events.EventEndUtc <= events.EventStartUtc)
+            {
+                ModelState.AddModelError("EventEndUtc", "Event end date must be after the start date.");
+            }
+            if (events.EventStartUtc < DateTime.UtcNow)
+            {
+                ModelState.AddModelError("EventStartUtc", "Event start date must be in the future.");
+            }
             if (!ModelState.IsValid)
             {
                 var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
                 ViewBag.CategoryList = _context.EventCategory.Select(u => new SelectListItem
                 {
                     Value = u.CategoryId.ToString(),
-                    Text = u.CategoryName
+                    Text = u.CategoryName,
+                    Selected = (u.CategoryId == events.CategoryId)
                 }).ToList();
                 return View(events);
             }
@@ -116,6 +125,14 @@ namespace Event_Management_And_Ticket_Booking_System.Areas.OrganizerArea.Control
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateEvent(Event events, IFormFile? file)
         {
+            if (events.EventEndUtc <= events.EventStartUtc)
+            {
+                ModelState.AddModelError("EventEndUtc", "Event end date must be after the start date.");
+            }
+            if (events.EventStartUtc < DateTime.UtcNow)
+            {
+                ModelState.AddModelError("EventStartUtc", "Event start date must be in the future.");
+            }
             if (!ModelState.IsValid)
             {
                 ViewBag.CategoryList = _context.EventCategory.Select(u => new SelectListItem

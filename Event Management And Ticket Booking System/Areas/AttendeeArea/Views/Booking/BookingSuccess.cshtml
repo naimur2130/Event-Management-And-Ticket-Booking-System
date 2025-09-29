@@ -1,0 +1,44 @@
+﻿@model Event_Management_And_Ticket_Booking_System.Models.Booking
+
+@{
+    ViewData["Title"] = "Booking Success";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white text-center">
+                    Booking Confirmed! 🎉
+                </div>
+                <div class="card-body">
+                    <h5>Event: @Model.Event.Title</h5>
+                    <p>Quantity: @Model.Quantity</p>
+                    <p>Total Amount: @Model.TotalAmount.ToString("C")</p>
+                    <p>Status: @Model.Status.ToString()</p>
+
+                    <h6 class="mt-4">Tickets:</h6>
+                    <ul class="list-group">
+                        @foreach (var ticket in Model.Tickets)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>@ticket.AttendeeName</strong>
+                                    <span class="badge bg-primary ms-2">@ticket.TicketCode</span>
+                                </div>
+                                <a asp-controller="Payment" asp-action="DownloadTicket" asp-route-ticketId="@ticket.TicketId"
+                                   class="btn btn-sm btn-outline-success">
+                                    Download 🎟️
+                                </a>
+                            </li>
+                        }
+                    </ul>
+
+                    <div class="mt-4 text-center">
+                        <a asp-controller="Event" asp-action="ShowEvents" class="btn btn-primary">Back to Events</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

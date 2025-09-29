@@ -25,12 +25,13 @@ namespace Event_Management_And_Ticket_Booking_System.Areas.AttendeeArea.Controll
             _web = web;
         }
 
+        [Route("EventIndex")]
         public async Task<IActionResult> Index()
         {
             var user = await _userManager.GetUserAsync(User);
             var events = await _context.Event
                 .Include(u => u.EventCategory)
-                .Where(e => e.CreatedByType == EventCreatedByType.Attendee && e.Status==EventStatus.Published)
+                .Where(e => e.CreatedByType == EventCreatedByType.Attendee && e.Status == EventStatus.Published)
                 .ToListAsync();
 
             return View(events);
@@ -38,11 +39,21 @@ namespace Event_Management_And_Ticket_Booking_System.Areas.AttendeeArea.Controll
 
         public async Task<IActionResult> ShowEvents()
         {
-            var events = await _context.Event
-                .Include(u => u.EventCategory)
-                .Where(e => e.Status==EventStatus.Draft)
-                .ToListAsync();
-            return View(events);
+            
+            var organizer = await _context.Event.Include(u => u.EventCategory).
+                Where(u => u.CreatedByType == EventCreatedByType.Organizer
+                && u.Status==EventStatus.Draft).ToListAsync();
+  
+            var attendee = await _context.Event.Include(u => u.EventCategory).
+                Where(u => u.CreatedByType == EventCreatedByType.Attendee
+                && u.Status==EventStatus.Published).ToListAsync();
+
+            var eventViewModel = new ViewModel.EventViewModel
+            {
+                OrganizerEvents = organizer,
+                AttendeeEvents = attendee
+            };
+            return View(eventViewModel);
         }
         public IActionResult AddEvents()
         {
@@ -60,12 +71,21 @@ namespace Event_Management_And_Ticket_Booking_System.Areas.AttendeeArea.Controll
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddEvents(Event events, IFormFile? file)
         {
+            if(events.EventEndUtc <= events.EventStartUtc)
+            {
+                ModelState.AddModelError("EventEndUtc", "Event end date must be after the start date.");
+            }
+            if(events.EventStartUtc < DateTime.UtcNow)
+            {
+                ModelState.AddModelError("EventStartUtc", "Event start date must be in the future.");
+            }
             if (!ModelState.IsValid)
             {
                 ViewBag.CategoryList = _context.EventCategory.Select(u => new SelectListItem
                 {
                     Value = u.CategoryId.ToString(),
-                    Text = u.CategoryName
+                    Text = u.CategoryName,
+                    Selected = (u.CategoryId == events.CategoryId)
                 }).ToList();
                 return View(events);
             }
@@ -125,6 +145,14 @@ namespace Event_Management_And_Ticket_Booking_System.Areas.AttendeeArea.Controll
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateEvent(Event events, IFormFile? file)
         {
+            if (events.EventEndUtc <= events.EventStartUtc)
+            {
+                ModelState.AddModelError("EventEndUtc", "Event end date must be after the start date.");
+            }
+            if (events.EventStartUtc < DateTime.UtcNow)
+            {
+                ModelState.AddModelError("EventStartUtc", "Event start date must be in the future.");
+            }
             var user = await _userManager.GetUserAsync(User);
             var existingEvent = await _context.Event.FirstOrDefaultAsync(u => u.EventId == events.EventId && u.UserId == user.Id);
 

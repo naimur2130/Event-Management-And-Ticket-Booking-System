@@ -50,6 +50,7 @@ namespace Event_Management_And_Ticket_Booking_System.Models
         public EventCreatedByType CreatedByType { get; set; } = EventCreatedByType.Organizer;
         [Required]
         public int? MaxAttendees { get; set; }
+        public decimal PricePerTicket { get; set; }
         [Required]
         public int CurrentAttendees { get; set; } = 0;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

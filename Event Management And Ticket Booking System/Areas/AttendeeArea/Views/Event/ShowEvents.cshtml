@@ -1,42 +1,112 @@
-﻿@model IEnumerable<Event_Management_And_Ticket_Booking_System.Models.Event>
+﻿@model Event_Management_And_Ticket_Booking_System.ViewModel.EventViewModel
 
 @{
     ViewData["Title"] = "Join an Event";
+    var cardColors = new[] { "#fef6f6", "#f6f9fe", "#f6fef9", "#fff9f6", "#fdf6ff", "#f6fffb" }; // soft pastel colors
+    int colorIndex = 0;
 }
 
 <style>
     body {
+        font-family: "Segoe UI", sans-serif;
         background: linear-gradient(135deg, #e0f7fa 0%, #ffffff 100%);
         min-height: 100vh;
-        font-family: "Segoe UI", sans-serif;
-    }
-
-    .container {
-        padding-top: 40px;
         padding-bottom: 40px;
     }
 
-    .add-event-btn {
-        margin-bottom: 30px;
+    .section-header {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        position: relative;
     }
 
-    .event-card {
-        border: none;
-        border-radius: 16px;
-        overflow: hidden;
-        background: #ffffff;
+        .section-header::after {
+            content: "";
+            position: absolute;
+            width: 50px;
+            height: 3px;
+            background: #0d6efd;
+            bottom: -5px;
+            left: 0;
+            border-radius: 2px;
+        }
+
+    .event-section {
+        margin-bottom: 50px;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 15px;
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    /* Horizontal scrolling wrapper */
+    .event-scroll {
+        display: flex;
+        overflow-x: auto;
+        gap: 20px;
+        padding-bottom: 10px;
+        scrollbar-width: thin;
+        scrollbar-color: #0d6efd #e0f7fa;
+    }
+
+        .event-scroll::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .event-scroll::-webkit-scrollbar-track {
+            background: #e0f7fa;
+            border-radius: 10px;
+        }
+
+        .event-scroll::-webkit-scrollbar-thumb {
+            background-color: #0d6efd;
+            border-radius: 10px;
+        }
+
+    .event-card {
+        flex: 0 0 220px;
+        border: none;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
     }
 
         .event-card:hover {
             transform: translateY(-6px);
-            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.12);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
         }
 
         .event-card .card-img-top {
-            height: 200px;
+            height: 140px; 
             object-fit: cover;
+        }
+
+        .event-card .card-body {
+            padding: 0.75rem; 
+            font-size: 0.85rem; 
+            display: flex;
+            flex-direction: column;
+        }
+
+        .event-card .card-title {
+            font-size: 1rem; 
+            margin-bottom: 0.25rem;
+        }
+
+        .event-card .card-text {
+            font-size: 0.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .event-card ul {
+            margin-bottom: 0.5rem;
+        }
+
+        .event-card .chip {
+            font-size: 0.75rem; /* smaller status chip */
+            padding: 0.25rem 0.5rem;
         }
 
     .badge-soft {
@@ -71,7 +141,7 @@
         color: #6c757d;
     }
 
-    .event-card .card-footer {
+    .card-footer {
         background: #f8f9fa;
         border-top: 1px solid #e9ecef;
         font-size: 0.85rem;
@@ -82,31 +152,26 @@
     }
 </style>
 
-<div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2>My Events</h2>
-            <p class="text-muted mb-0">Create, manage and track your events in one place.</p>
-        </div>
-        <a href="@Url.Action("AddEvents", "Event", new { area = "OrganizerArea" })" class="btn btn-primary add-event-btn">
-            + Add Event
-        </a>
-    </div>
+<div class="container py-5">
 
-    @if (!Model.Any())
-    {
-        <div class="alert alert-info text-center shadow-sm">
-            You haven't created any events yet.
-            <a href="@Url.Action("AddEvents", "Event", new { area = "OrganizerArea" })" class="btn btn-primary btn-sm ms-2">Create Event</a>
-        </div>
-    }
-    else
-    {
-        <div class="row g-4">
-            @foreach (var item in Model)
-            {
-                <div class="col-md-6 col-lg-4">
-                    <div class="card event-card h-100">
+    <!-- Organizer Events Section -->
+    <div class="event-section">
+        <h3 class="section-header">🎯 Organizer Events</h3>
+
+        @if (!Model.OrganizerEvents.Any())
+        {
+            <div class="alert alert-info text-center shadow-sm">
+                No events created by organizers yet.
+            </div>
+        }
+        else
+        {
+            <div class="event-scroll">
+                @foreach (var item in Model.OrganizerEvents)
+                {
+                    var bgColor = cardColors[colorIndex % cardColors.Length];
+                    colorIndex++;
+                    <div class="card event-card" style="background:@bgColor;">
                         <img src="@(string.IsNullOrEmpty(item.BannerImagePath) ? "~/images/no-image.png" : item.BannerImagePath)"
                              class="card-img-top" alt="@item.Title" />
 
@@ -115,39 +180,97 @@
                                 <h5 class="card-title mb-0">@item.Title</h5>
                                 <span class="badge badge-soft">@item.EventCategory?.CategoryName ?? "N/A"</span>
                             </div>
-
-                            <p class="card-text text-muted" title="@item.EventDescription">
-                                @item.EventDescription
-                            </p>
-
-                            <ul class="list-unstyled small mb-3">
+                            <p class="card-text text-muted">@item.EventDescription</p>
+                            <ul class="list-unstyled small mb-2">
                                 <li><i class="bi bi-geo-alt me-1"></i>@item.EventLocation</li>
                                 <li><strong>Start:</strong> @item.EventStartUtc:g</li>
                                 <li><strong>End:</strong> @item.EventEndUtc:g</li>
                             </ul>
-
                             @{
                                 var statusClass =
                                 item.Status == Event_Management_And_Ticket_Booking_System.Models.EventStatus.Published ? "chip chip-published" :
                                 item.Status == Event_Management_And_Ticket_Booking_System.Models.EventStatus.Cancelled ? "chip chip-cancelled" :
                                 "chip chip-draft";
                             }
-                            <div class="mb-3">
+                            <div class="mb-2">
                                 <span class="@statusClass">@item.Status</span>
                             </div>
 
-                            <div class="mt-auto event-actions">
-                                <a href="@Url.Action("Details", "Event", new { area = "AttendeeArea", id = item.EventId })" class="btn btn-warning btn-sm">Details</a>
-                                
-                            </div>
+                            @* Quantity + Book Now *@
+                            <form asp-controller="Booking" asp-action="SelectTickets" method="post" class="mt-auto">
+                                <input type="hidden" name="EventId" value="@item.EventId" />
+                                <div class="d-flex align-items-center mb-2">
+                                    <input type="number" name="Quantity" value="1" min="1" max="10" class="form-control form-control-sm me-2" style="width: 70px;" />
+                                    <button type="submit" class="btn btn-success btn-sm flex-shrink-0">Book Now</button>
+                                </div>
+                            </form>
                         </div>
-
                         <div class="card-footer text-muted small">
                             Created @item.CreatedAt:g
                         </div>
                     </div>
-                </div>
-            }
-        </div>
-    }
+                }
+            </div>
+        }
+    </div>
+
+    <!-- Attendee Events Section -->
+    <div class="event-section">
+        <h3 class="section-header">🙋 Attendee Events</h3>
+
+        @if (!Model.AttendeeEvents.Any())
+        {
+            <div class="alert alert-info text-center shadow-sm">
+                No events created by attendees yet.
+            </div>
+        }
+        else
+        {
+            <div class="event-scroll">
+                @foreach (var item in Model.AttendeeEvents)
+                {
+                    var bgColor = cardColors[colorIndex % cardColors.Length];
+                    colorIndex++;
+                    <div class="card event-card" style="background:@bgColor;">
+                        <img src="@(string.IsNullOrEmpty(item.BannerImagePath) ? "~/images/no-image.png" : item.BannerImagePath)"
+                             class="card-img-top" alt="@item.Title" />
+
+                        <div class="card-body d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title mb-0">@item.Title</h5>
+                                <span class="badge badge-soft">@item.EventCategory?.CategoryName ?? "N/A"</span>
+                            </div>
+                            <p class="card-text text-muted">@item.EventDescription</p>
+                            <ul class="list-unstyled small mb-2">
+                                <li><i class="bi bi-geo-alt me-1"></i>@item.EventLocation</li>
+                                <li><strong>Start:</strong> @item.EventStartUtc:g</li>
+                                <li><strong>End:</strong> @item.EventEndUtc:g</li>
+                            </ul>
+                            @{
+                                var statusClass =
+                                item.Status == Event_Management_And_Ticket_Booking_System.Models.EventStatus.Published ? "chip chip-published" :
+                                item.Status == Event_Management_And_Ticket_Booking_System.Models.EventStatus.Cancelled ? "chip chip-cancelled" :
+                                "chip chip-draft";
+                            }
+                            <div class="mb-2">
+                                <span class="@statusClass">@item.Status</span>
+                            </div>
+
+                            <form asp-controller="Booking" asp-action="SelectTickets" method="post" class="mt-auto">
+                                <input type="hidden" name="EventId" value="@item.EventId" />
+                                <div class="d-flex align-items-center mb-2">
+                                    <input type="number" name="Quantity" value="1" min="1" max="10" class="form-control form-control-sm me-2" style="width: 70px;" />
+                                    <button type="submit" class="btn btn-success btn-sm flex-shrink-0">Book Now</button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="card-footer text-muted small">
+                            Created @item.CreatedAt:g
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
 </div>
