@@ -6,5 +6,10 @@ namespace Event_Management_And_Ticket_Booking_System.ViewModel
     {
         public IEnumerable<Event> OrganizerEvents { get; set; } = new List<Event>();
         public IEnumerable<Event> AttendeeEvents { get; set; } = new List<Event>();
+
+        public string SearchTerm { get; set; }
+        public int? CategoryId { get; set; }
+        public List<EventCategory> Categories { get; set; }
+        public string? Source { get; set; }
     }
 }

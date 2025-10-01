@@ -1,6 +1,7 @@
 using Event_Management_And_Ticket_Booking_System.Data;
 using Event_Management_And_Ticket_Booking_System.Models;
 using Event_Management_And_Ticket_Booking_System.Services;
+using Event_Management_And_Ticket_Booking_System.Services.IService;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using QuestPDF.Infrastructure;
@@ -19,6 +20,8 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 builder.Services.AddHttpClient();
 QuestPDF.Settings.License = LicenseType.Community;
+builder.Services.AddScoped<IEmailService, EmailService>();
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())

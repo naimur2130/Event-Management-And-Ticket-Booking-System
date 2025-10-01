@@ -1,6 +1,12 @@
 ﻿using Event_Management_And_Ticket_Booking_System.Models;
 using QuestPDF.Fluent;
 using QuestPDF.Infrastructure;
+using QRCoder;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
+using System.IO;
 
 namespace Event_Management_And_Ticket_Booking_System.Services
 {
@@ -16,26 +22,64 @@ namespace Event_Management_And_Ticket_Booking_System.Services
                     {
                         page.Margin(20);
 
+                        page.Background("#ffffff"); // plain white background
+
                         page.Header()
-                            .Text("Event Ticket")
-                            .SemiBold().FontSize(24).AlignCenter();
+                            .Text("🎫 Event Ticket")
+                            .SemiBold()
+                            .FontSize(24)
+                            .AlignCenter();
 
                         page.Content()
-                            .Column(col =>
+                            .Padding(10)
+                            .Border(1)
+                            .BorderColor("#0d6efd")
+                            .Border(10) // rounded border
+                            .Background("#f8f9fa")
+                            .Row(row =>
                             {
-                                col.Item().Text($"Event: {ticket.Booking?.Event?.Title ?? "N/A"}").Bold().FontSize(18);
-                                col.Item().Text($"Attendee: {ticket.AttendeeName}");
-                                col.Item().Text($"Email: {ticket.AttendeeEmail}");
-                                col.Item().Text($"Phone: {ticket.AttendeePhone}");
-                                col.Item().Text($"Ticket Code: {ticket.TicketCode}").Bold();
-                                col.Item().Text($"Booking ID: {ticket.BookingId}");
-                                col.Item().Text("----------------------------------------");
+                                // Left Column: Ticket Info
+                                row.RelativeColumn(3)
+                                    .Column(col =>
+                                    {
+                                        col.Item().Text($"Event: {ticket.Booking?.Event?.Title ?? "N/A"}")
+                                            .Bold()
+                                            .FontSize(18);
+                                        col.Item().Text($"Attendee: {ticket.AttendeeName}").FontSize(14);
+                                        col.Item().Text($"Email: {ticket.AttendeeEmail}").FontSize(14);
+                                        col.Item().Text($"Phone: {ticket.AttendeePhone}").FontSize(14);
+                                        col.Item().Text($"Ticket Code: {ticket.TicketCode}")
+                                            .Bold()
+                                            .FontSize(16);
+                                        col.Item().Text($"Booking ID: {ticket.BookingId}").FontSize(14);
+                                        col.Item().Text($"Status: {ticket.Booking?.Status.ToString() ?? "N/A"}").FontSize(14);
+                                    });
+
+                                // Right Column: QR Code
+                                row.ConstantColumn(150)
+                                    .AlignMiddle()
+                                    .AlignCenter()
+                                    .Image(GenerateQrCode(ticket.TicketCode), QuestPDF.Infrastructure.ImageScaling.FitWidth);
                             });
+
+                        page.Footer()
+                            .AlignCenter()
+                            .Text($"Generated on {DateTime.Now:g}")
+                            .FontSize(10)
+                            .SemiBold();
                     });
                 }
             });
 
             return pdf.GeneratePdf();
+        }
+
+        private static byte[] GenerateQrCode(string qrText)
+        {
+            using var qrGenerator = new QRCodeGenerator();
+            using var qrData = qrGenerator.CreateQrCode(qrText, QRCodeGenerator.ECCLevel.Q);
+            using var qrCode = new PngByteQRCode(qrData); // Use ImageSharp-compatible QR code generator
+            return qrCode.GetGraphic(20); // Generates a PNG byte array
         }
     }
 }

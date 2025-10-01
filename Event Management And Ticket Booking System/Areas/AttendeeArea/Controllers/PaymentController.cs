@@ -1,8 +1,10 @@
 ﻿using Event_Management_And_Ticket_Booking_System.Data;
 using Event_Management_And_Ticket_Booking_System.Models;
 using Event_Management_And_Ticket_Booking_System.Services;
+using Event_Management_And_Ticket_Booking_System.Services.IService;
 using Event_Management_And_Ticket_Booking_System.ViewModel;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -16,6 +18,7 @@ namespace Event_Management_And_Ticket_Booking_System.Areas.AttendeeArea.Controll
         private readonly ApplicationDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IEmailService _emailService;
 
         // SSLCommerz credentials
         private readonly string storeId = "iubat68daa0ff0a96f";
@@ -27,11 +30,13 @@ namespace Event_Management_And_Ticket_Booking_System.Areas.AttendeeArea.Controll
 
         public PaymentController(ApplicationDbContext context,
                                  UserManager<IdentityUser> userManager,
-                                 IHttpClientFactory httpClientFactory)
+                                 IHttpClientFactory httpClientFactory,
+                                 IEmailService emailService)
         {
             _context = context;
             _userManager = userManager;
             _httpClientFactory = httpClientFactory;
+            _emailService = emailService;
         }
 
         [HttpGet]
@@ -103,6 +108,7 @@ namespace Event_Management_And_Ticket_Booking_System.Areas.AttendeeArea.Controll
         }
 
         [HttpGet]
+        [HttpGet]
         public async Task<IActionResult> PaymentSuccess(int bookingId)
         {
             var booking = await _context.Booking
@@ -118,6 +124,7 @@ namespace Event_Management_And_Ticket_Booking_System.Areas.AttendeeArea.Controll
             var tempAttendees = await _context.TempAttendees
                                               .Where(t => t.BookingId == bookingId)
                                               .ToListAsync();
+
             var tickets = new List<Tickets>();
             foreach (var attendee in tempAttendees)
             {
@@ -137,16 +144,34 @@ namespace Event_Management_And_Ticket_Booking_System.Areas.AttendeeArea.Controll
             _context.TempAttendees.RemoveRange(tempAttendees);
             await _context.SaveChangesAsync();
 
+            // **Send Email to all attendees**
+            foreach (var ticket in tickets)
+            {
+                string emailBody = $@"
+            <h3>Booking Confirmation</h3>
+            <p>Dear {ticket.AttendeeName},</p>
+            <p>Your booking for <strong>{booking.Event.Title}</strong> is confirmed.</p>
+            <ul>
+                <li><strong>Date:</strong> {booking.Event.EventStartUtc:g}</li>
+                <li><strong>Location:</strong> {booking.Event.EventLocation}</li>
+                <li><strong>Ticket Code:</strong> {ticket.TicketCode}</li>
+            </ul>
+            <p>Thank you for booking with us!</p>
+        ";
+
+                await _emailService.SendEmailAsync(ticket.AttendeeEmail,
+                                                   "Booking Confirmation - Event Ticket",
+                                                   emailBody);
+            }
+
             booking = await _context.Booking
                              .Include(b => b.Event)
                              .Include(b => b.Tickets)
                              .FirstOrDefaultAsync(b => b.BookingId == bookingId);
 
-            // ✅ Show the success page instead of forcing download
-            // In PaymentController
             return View("~/Areas/AttendeeArea/Views/Booking/BookingSuccess.cshtml", booking);
-
         }
+
 
         [HttpGet]
         public async Task<IActionResult> PaymentFailed(int bookingId)

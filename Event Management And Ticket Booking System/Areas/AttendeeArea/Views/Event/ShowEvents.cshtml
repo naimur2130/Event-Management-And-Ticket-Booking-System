@@ -40,7 +40,6 @@
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
     }
 
-    /* Horizontal scrolling wrapper */
     .event-scroll {
         display: flex;
         overflow-x: auto;
@@ -79,19 +78,19 @@
         }
 
         .event-card .card-img-top {
-            height: 140px; 
+            height: 140px;
             object-fit: cover;
         }
 
         .event-card .card-body {
-            padding: 0.75rem; 
-            font-size: 0.85rem; 
+            padding: 0.75rem;
+            font-size: 0.85rem;
             display: flex;
             flex-direction: column;
         }
 
         .event-card .card-title {
-            font-size: 1rem; 
+            font-size: 1rem;
             margin-bottom: 0.25rem;
         }
 
@@ -105,7 +104,7 @@
         }
 
         .event-card .chip {
-            font-size: 0.75rem; /* smaller status chip */
+            font-size: 0.75rem;
             padding: 0.25rem 0.5rem;
         }
 
@@ -154,8 +153,36 @@
 
 <div class="container py-5">
 
-    <!-- Organizer Events Section -->
     <div class="event-section">
+        <div class="container py-3 mb-4">
+            <form method="get" asp-action="ShowEvents" class="row g-2">
+                <input type="hidden" name="source" value="Organizer" /> 
+
+                <div class="col-md-4">
+                    <input type="text" name="searchTerm" value="@(Model.Source == "Organizer" ? Model.SearchTerm : "")"
+                           placeholder="Search by organizer event name"
+                           class="form-control" />
+                </div>
+
+                <div class="col-md-4">
+                    <select name="categoryId" class="form-select">
+                        <option value="">-- All Categories --</option>
+                        @foreach (var cat in Model.Categories)
+                        {
+                            <option value="@cat.CategoryId"
+                                    selected="@(Model.Source == "Organizer" && Model.CategoryId == cat.CategoryId)">
+                                @cat.CategoryName
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary w-100">Search Organizer Events</button>
+                </div>
+            </form>
+        </div>
+
         <h3 class="section-header">🎯 Organizer Events</h3>
 
         @if (!Model.OrganizerEvents.Any())
@@ -196,7 +223,6 @@
                                 <span class="@statusClass">@item.Status</span>
                             </div>
 
-                            @* Quantity + Book Now *@
                             <form asp-controller="Booking" asp-action="SelectTickets" method="post" class="mt-auto">
                                 <input type="hidden" name="EventId" value="@item.EventId" />
                                 <div class="d-flex align-items-center mb-2">
@@ -214,8 +240,36 @@
         }
     </div>
 
-    <!-- Attendee Events Section -->
     <div class="event-section">
+
+        <div class="container py-3 mb-4">
+            <form method="get" asp-action="ShowEvents" class="row g-2">
+                <input type="hidden" name="source" value="Attendee" />
+
+                <div class="col-md-4">
+                    <input type="text" name="searchTerm" value="@(Model.Source == "Attendee" ? Model.SearchTerm : "")"
+                           placeholder="Search by attendee event name"
+                           class="form-control" />
+                </div>
+
+                <div class="col-md-4">
+                    <select name="categoryId" class="form-select">
+                        <option value="">-- All Categories --</option>
+                        @foreach (var cat in Model.Categories)
+                        {
+                            <option value="@cat.CategoryId"
+                                    selected="@(Model.Source == "Attendee" && Model.CategoryId == cat.CategoryId)">
+                                @cat.CategoryName
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary w-100">Search Attendee Events</button>
+                </div>
+            </form>
+        </div>
         <h3 class="section-header">🙋 Attendee Events</h3>
 
         @if (!Model.AttendeeEvents.Any())

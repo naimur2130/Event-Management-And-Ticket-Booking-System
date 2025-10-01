@@ -1,5 +1,6 @@
 ﻿using Event_Management_And_Ticket_Booking_System.Data;
 using Event_Management_And_Ticket_Booking_System.Models;
+using Event_Management_And_Ticket_Booking_System.ViewModel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -37,24 +38,48 @@ namespace Event_Management_And_Ticket_Booking_System.Areas.AttendeeArea.Controll
             return View(events);
         }
 
-        public async Task<IActionResult> ShowEvents()
+        public IActionResult ShowEvents(string? searchTerm, int? categoryId, string? source)
         {
-            
-            var organizer = await _context.Event.Include(u => u.EventCategory).
-                Where(u => u.CreatedByType == EventCreatedByType.Organizer
-                && u.Status==EventStatus.Draft).ToListAsync();
-  
-            var attendee = await _context.Event.Include(u => u.EventCategory).
-                Where(u => u.CreatedByType == EventCreatedByType.Attendee
-                && u.Status==EventStatus.Published).ToListAsync();
-
-            var eventViewModel = new ViewModel.EventViewModel
+            var vm = new EventViewModel
             {
-                OrganizerEvents = organizer,
-                AttendeeEvents = attendee
+                SearchTerm = searchTerm,
+                CategoryId = categoryId,
+                Source = source,
+                Categories = _context.EventCategory.ToList()
             };
-            return View(eventViewModel);
+
+            // Get all events first
+            var organizerEvents = _context.Event
+                .Where(e => e.CreatedByType == EventCreatedByType.Organizer)
+                .AsQueryable();
+
+            var attendeeEvents = _context.Event
+                .Where(e => e.CreatedByType == EventCreatedByType.Attendee)
+                .AsQueryable();
+
+            // Apply filter only on the chosen section
+            if (source == "Organizer")
+            {
+                if (!string.IsNullOrEmpty(searchTerm))
+                    organizerEvents = organizerEvents.Where(e => e.Title.Contains(searchTerm));
+                if (categoryId.HasValue)
+                    organizerEvents = organizerEvents.Where(e => e.CategoryId == categoryId);
+            }
+            else if (source == "Attendee")
+            {
+                if (!string.IsNullOrEmpty(searchTerm))
+                    attendeeEvents = attendeeEvents.Where(e => e.Title.Contains(searchTerm));
+                if (categoryId.HasValue)
+                    attendeeEvents = attendeeEvents.Where(e => e.CategoryId == categoryId);
+            }
+
+            vm.OrganizerEvents = organizerEvents.ToList();
+            vm.AttendeeEvents = attendeeEvents.ToList();
+
+            return View(vm);
         }
+
+
         public IActionResult AddEvents()
         {
             ViewBag.CategoryList = _context.EventCategory
