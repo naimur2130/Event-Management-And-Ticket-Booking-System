@@ -64,11 +64,12 @@ namespace Event_Management_And_Ticket_Booking_System.Areas.AttendeeArea.Controll
             if (ev == null) return NotFound();
 
             decimal totalAmount = ev.PricePerTicket * model.Quantity;
-
+            var userProfile = await _context.UserProfile.FirstOrDefaultAsync(p => p.UserId == user.Id);
             var booking = new Booking
             {
                 EventId = model.EventId,
                 UserId = user.Id,
+                UserProfileId = userProfile.UserProfileId,
                 Quantity = model.Quantity,
                 TotalAmount = totalAmount,
                 Status = BookingStatus.AwaitApproval

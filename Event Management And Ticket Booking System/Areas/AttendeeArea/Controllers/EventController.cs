@@ -51,7 +51,6 @@ namespace Event_Management_And_Ticket_Booking_System.Areas.AttendeeArea.Controll
                 Categories = _context.EventCategory.ToList()
             };
 
-            // Get all events first
             var organizerEvents = _context.Event
                 .Where(e => e.CreatedByType == EventCreatedByType.Organizer)
                 .AsQueryable();
@@ -60,7 +59,6 @@ namespace Event_Management_And_Ticket_Booking_System.Areas.AttendeeArea.Controll
                 .Where(e => e.CreatedByType == EventCreatedByType.Attendee)
                 .AsQueryable();
 
-            // Apply filter only on the chosen section
             if (source == "Organizer")
             {
                 if (!string.IsNullOrEmpty(searchTerm))
@@ -79,8 +77,7 @@ namespace Event_Management_And_Ticket_Booking_System.Areas.AttendeeArea.Controll
             vm.OrganizerEvents = organizerEvents.ToList();
             vm.AttendeeEvents = attendeeEvents.ToList();
 
-            // Fetch current user's bookings for all events (needed for PayNow / badges)
-            vm.UserBookings = _context.Booking
+            vm.UserBookings = _context.Booking.Include(b=>b.Event)
                 .Where(b => b.UserId == currentUserId)
                 .ToList();
 

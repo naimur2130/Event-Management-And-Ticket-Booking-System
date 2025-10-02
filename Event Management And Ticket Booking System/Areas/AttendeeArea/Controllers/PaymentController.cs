@@ -20,12 +20,9 @@ namespace Event_Management_And_Ticket_Booking_System.Areas.AttendeeArea.Controll
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IEmailService _emailService;
 
-        // SSLCommerz credentials
         private readonly string storeId = "iubat68daa0ff0a96f";
         private readonly string storePassword = "iubat68daa0ff0a96f@ssl";
         private readonly string sslCommerzApiUrl = "https://sandbox.sslcommerz.com/gwprocess/v4/api.php";
-
-        // NGROK URL for testing
         private readonly string baseUrl = "https://badgeless-ariana-unstifled.ngrok-free.dev";
 
         public PaymentController(ApplicationDbContext context,
@@ -49,7 +46,6 @@ namespace Event_Management_And_Ticket_Booking_System.Areas.AttendeeArea.Controll
 
             if (booking == null) return NotFound();
 
-            // Retrieve attendees
             var attendees = await _context.TempAttendees
                                           .Where(t => t.BookingId == bookingId)
                                           .ToListAsync();
@@ -57,12 +53,30 @@ namespace Event_Management_And_Ticket_Booking_System.Areas.AttendeeArea.Controll
             if (attendees == null || !attendees.Any())
                 return Content("No attendee information found. Cannot proceed with payment.");
 
-            // Prepare payment request
+            var profile = await _context.UserProfile
+                               .FirstOrDefaultAsync(p => p.UserId == booking.UserId);
+
+            decimal totalAmount = booking.TotalAmount;
+
+            if (profile != null && profile.IsSubscribed && profile.SubscriptionStatus == SubscriptionStatus.Active)
+            {
+                decimal discountPercentage = profile.SubscriptionType switch
+                {
+                    SubscriptionType.Monthly => 5m,
+                    SubscriptionType.Quarterly => 10m,
+                    SubscriptionType.Yearly => 15m,
+                    _ => 0m
+                };
+
+                totalAmount -= (totalAmount * discountPercentage / 100m);
+            }
+
+
             var values = new Dictionary<string, string>
     {
         { "store_id", storeId },
         { "store_passwd", storePassword },
-        { "total_amount", booking.TotalAmount.ToString() },
+        { "total_amount", totalAmount.ToString("F2") },
         { "currency", "BDT" },
         { "tran_id", $"EVT{booking.BookingId}{DateTime.Now.Ticks}" },
         { "success_url", $"{baseUrl}/AttendeeArea/Payment/PaymentSuccess?bookingId={booking.BookingId}" },
@@ -102,15 +116,36 @@ namespace Event_Management_And_Ticket_Booking_System.Areas.AttendeeArea.Controll
             var booking = await _context.Booking
                                         .Include(b => b.Event)
                                         .Include(b => b.User)
+                                        .Include(b=>b.UserProfile)
                                         .FirstOrDefaultAsync(b => b.BookingId == bookingId);
 
-            if (booking == null) return NotFound();
+            if (booking == null) 
+                return NotFound();
 
+            decimal totalAmount = booking.TotalAmount; 
+            decimal discountAmount = 0;
+
+            if (booking.UserProfile != null && booking.UserProfile.IsSubscribed &&
+                booking.UserProfile.SubscriptionStatus == SubscriptionStatus.Active)
+            {
+                decimal discountPercentage = booking.UserProfile.SubscriptionType switch
+                {
+                    SubscriptionType.Monthly => 5m,
+                    SubscriptionType.Quarterly => 10m,
+                    SubscriptionType.Yearly => 15m,
+                    _ => 0m
+                };
+
+                discountAmount = totalAmount * discountPercentage / 100m;
+                totalAmount -= discountAmount; 
+
+            }
+            booking.TotalAmount = totalAmount;
             booking.Status = BookingStatus.Confirmed;
             _context.Update(booking);
             await _context.SaveChangesAsync();
 
-            // Retrieve temporary attendees
+
             var tempAttendees = await _context.TempAttendees
                                               .Where(t => t.BookingId == bookingId)
                                               .ToListAsync();
@@ -195,7 +230,6 @@ namespace Event_Management_And_Ticket_Booking_System.Areas.AttendeeArea.Controll
 
             if (ticket == null) return NotFound();
 
-            // Generate PDF for this single ticket
             var pdfBytes = TicketPdfGenerator.GeneratePdf(new List<Tickets> { ticket });
 
             return File(pdfBytes, "application/pdf", $"Ticket_{ticket.TicketCode}.pdf");

@@ -12,7 +12,9 @@ namespace Event_Management_And_Ticket_Booking_System.Models
         Confirmed=1,
         Cancelled=2,
         Failed= 3,
-        AwaitApproval = 4
+        AwaitApproval = 4,
+        Rejected = 5,
+        None = 6
     }
     public class Booking
     {
@@ -25,15 +27,19 @@ namespace Event_Management_And_Ticket_Booking_System.Models
         [ForeignKey("User")]
         public string? UserId { get; set; } 
         public IdentityUser? User { get; set; }
+        [ForeignKey("UserProfile")]
+        public int UserProfileId { get; set; }
+        public UserProfile? UserProfile { get; set; }
         [Required]
         public int Quantity { get; set; }
         [Required]
         [DataType(DataType.Currency)]
         public decimal TotalAmount { get; set; }
         [Required]
-        public BookingStatus Status { get; set; } = BookingStatus.Pending;
+        public BookingStatus Status { get; set; } = BookingStatus.None;
         [Required]
         public DateTime BookingDate { get; set; } = DateTime.UtcNow;
         public ICollection<Tickets> Tickets { get; set; }
+        public ICollection<TempAttendees> TempAttendees { get; set; } = new List<TempAttendees>();
     }
 }

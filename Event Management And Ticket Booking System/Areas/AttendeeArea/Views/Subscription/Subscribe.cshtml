@@ -1,0 +1,23 @@
+﻿@model Event_Management_And_Ticket_Booking_System.Models.UserProfile
+
+<div class="container py-5">
+    <h2>Choose Your Subscription</h2>
+    <div class="card shadow p-4">
+        <form asp-action="Subscribe" method="post">
+            <input type="hidden" asp-for="UserProfileId" />
+
+            <div class="mb-3">
+                <label class="form-label">Select Subscription Plan</label>
+                <select class="form-select" name="subscriptionType" required>
+                    <option value="">-- Select a plan --</option>
+                    <option value="0">Monthly - 500 BDT</option>
+                    <option value="1">Quarterly - 1400 BDT</option>
+                    <option value="2">Yearly - 5000 BDT</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-success">Proceed to Payment</button>
+            <a asp-action="Profile" class="btn btn-secondary ms-2">Cancel</a>
+        </form>
+    </div>
+</div>

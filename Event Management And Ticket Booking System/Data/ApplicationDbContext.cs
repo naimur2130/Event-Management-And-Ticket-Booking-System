@@ -16,6 +16,8 @@ namespace Event_Management_And_Ticket_Booking_System.Data
         public DbSet<TempAttendees> TempAttendees { get; set; } 
         public DbSet<EventPhoto> EventPhoto { get; set; }
         public DbSet<Payment> Payment { get; set; } 
+        public DbSet<UserProfile> UserProfile { get; set; }
+        public DbSet<SubscriptionPayment> SubscriptionPayment { get; set; }
 
-    }
+        }
 }

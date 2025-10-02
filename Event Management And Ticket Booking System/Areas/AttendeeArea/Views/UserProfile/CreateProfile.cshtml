@@ -1,0 +1,40 @@
+﻿@model Event_Management_And_Ticket_Booking_System.Models.UserProfile
+
+<div class="container py-5">
+    <h2>Add Profile Info</h2>
+
+    <form asp-action="CreateProfile" method="post" enctype="multipart/form-data" class="card p-4 shadow-sm">
+        <div class="mb-3">
+            <label asp-for="FullName" class="form-label"></label>
+            <input asp-for="FullName" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Phone" class="form-label"></label>
+            <input asp-for="Phone" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Address" class="form-label"></label>
+            <textarea asp-for="Address" class="form-control"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="City" class="form-label"></label>
+            <input asp-for="City" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Country" class="form-label"></label>
+            <input asp-for="Country" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Profile Image</label>
+            <input type="file" name="ImageFile" class="form-control" />
+        </div>
+
+        <button type="submit" class="btn btn-success">Save</button>
+        <a asp-action="Profile" class="btn btn-secondary ms-2">Cancel</a>
+    </form>
+</div>

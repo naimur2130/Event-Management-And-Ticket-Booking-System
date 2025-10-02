@@ -119,6 +119,9 @@
                             <li class="nav-item">
                                 <a class="nav-link" asp-area="AttendeeArea" asp-controller="MyEvent" asp-action="Index">Enrolled</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="AttendeeArea" asp-controller="UserProfile" asp-action="Profile">Profile</a>
+                            </li>
                         }
                         @if (User.IsInRole("Admin"))
                         {
