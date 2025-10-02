@@ -71,13 +71,27 @@ namespace Event_Management_And_Ticket_Booking_System.Areas.AttendeeArea.Controll
                 UserId = user.Id,
                 Quantity = model.Quantity,
                 TotalAmount = totalAmount,
-                Status = BookingStatus.Pending
+                Status = BookingStatus.AwaitApproval
             };
 
             _context.Booking.Add(booking);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction("InitiatePayment", "Payment", new { area = "AttendeeArea", bookingId = booking.BookingId, attendeesJson = JsonConvert.SerializeObject(model.Attendees) });
+            foreach (var attendee in model.Attendees)
+            {
+                var temp = new TempAttendees
+                {
+                    BookingId = booking.BookingId,
+                    AttendeeName = attendee.AttendeeName,
+                    AttendeeEmail = attendee.AttendeeEmail,
+                    AttendeePhone = attendee.AttendeePhone
+                };
+                _context.TempAttendees.Add(temp);
+            }
+            await _context.SaveChangesAsync();
+
+
+            return RedirectToAction("BookingRequestSent");
         }
 
 
@@ -91,5 +105,10 @@ namespace Event_Management_And_Ticket_Booking_System.Areas.AttendeeArea.Controll
             if (booking == null) return NotFound();
             return View(booking);
         }
+
+        public IActionResult BookingRequestSent()
+        {
+            return View();
+        }   
     }
 }

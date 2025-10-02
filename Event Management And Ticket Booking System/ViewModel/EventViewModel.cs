@@ -11,5 +11,7 @@ namespace Event_Management_And_Ticket_Booking_System.ViewModel
         public int? CategoryId { get; set; }
         public List<EventCategory> Categories { get; set; }
         public string? Source { get; set; }
+        public List<Booking> UserBookings { get; set; } = new List<Booking>();
+        public List<AttendeeForm> Attendees { get; set; } = new List<AttendeeForm>();
     }
 }

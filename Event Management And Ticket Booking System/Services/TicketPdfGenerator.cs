@@ -22,7 +22,7 @@ namespace Event_Management_And_Ticket_Booking_System.Services
                     {
                         page.Margin(20);
 
-                        page.Background("#ffffff"); // plain white background
+                        page.Background("#ffffff");
 
                         page.Header()
                             .Text("🎫 Event Ticket")
@@ -34,11 +34,11 @@ namespace Event_Management_And_Ticket_Booking_System.Services
                             .Padding(10)
                             .Border(1)
                             .BorderColor("#0d6efd")
-                            .Border(10) // rounded border
+                            .Border(10)
                             .Background("#f8f9fa")
                             .Row(row =>
                             {
-                                // Left Column: Ticket Info
+                                
                                 row.RelativeColumn(3)
                                     .Column(col =>
                                     {
@@ -55,7 +55,7 @@ namespace Event_Management_And_Ticket_Booking_System.Services
                                         col.Item().Text($"Status: {ticket.Booking?.Status.ToString() ?? "N/A"}").FontSize(14);
                                     });
 
-                                // Right Column: QR Code
+                               
                                 row.ConstantColumn(150)
                                     .AlignMiddle()
                                     .AlignCenter()
@@ -78,8 +78,8 @@ namespace Event_Management_And_Ticket_Booking_System.Services
         {
             using var qrGenerator = new QRCodeGenerator();
             using var qrData = qrGenerator.CreateQrCode(qrText, QRCodeGenerator.ECCLevel.Q);
-            using var qrCode = new PngByteQRCode(qrData); // Use ImageSharp-compatible QR code generator
-            return qrCode.GetGraphic(20); // Generates a PNG byte array
+            using var qrCode = new PngByteQRCode(qrData); 
+            return qrCode.GetGraphic(20); 
         }
     }
 }

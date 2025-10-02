@@ -1,0 +1,54 @@
+﻿@model List<Event_Management_And_Ticket_Booking_System.Models.EventPhoto>
+@{
+    ViewData["Title"] = "My Event Photos";
+    int eventId = (int)ViewBag.EventId;
+}
+
+<div class="container mt-5">
+    <h2 class="mb-4 text-center">📷 My Photos</h2>
+
+    <!-- Upload + Bulk Download Buttons -->
+    <div class="mb-4 d-flex justify-content-between align-items-center">
+        <form asp-area="AttendeeArea" asp-controller="MyEvent" asp-action="UploadPhotos" method="post" enctype="multipart/form-data" class="d-flex">
+            <input type="hidden" name="eventId" value="@eventId" />
+            <input type="file" name="Photos" multiple class="form-control me-2" />
+            <button type="submit" class="btn btn-success">Upload</button>
+        </form>
+
+        <a asp-area="AttendeeArea" asp-controller="MyEvent" asp-action="DownloadAll" asp-route-eventId="@eventId" class="btn btn-warning">
+            ⬇️ Download All
+        </a>
+    </div>
+
+    <!-- Photo Grid -->
+    <div class="row g-3">
+        @if (Model != null && Model.Any())
+        {
+            foreach (var photo in Model)
+            {
+                <div class="col-6 col-md-4 col-lg-3">
+                    <div class="card shadow-sm overflow-hidden" style="border-radius:10px;">
+                        <div class="photo-container position-relative">
+                            <img src="@photo.FilePath" class="card-img-top" style="height:200px; object-fit:cover; transition: transform 0.3s;" />
+                            <a href="@photo.FilePath" download class="btn btn-primary btn-sm position-absolute top-0 end-0 m-2">
+                                ⬇️
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12 text-center">
+                <p class="text-muted">No photos uploaded yet.</p>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .photo-container:hover img {
+        transform: scale(1.1);
+    }
+</style>

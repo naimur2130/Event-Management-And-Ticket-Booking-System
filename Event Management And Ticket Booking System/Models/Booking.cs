@@ -11,7 +11,8 @@ namespace Event_Management_And_Ticket_Booking_System.Models
         Pending=0,
         Confirmed=1,
         Cancelled=2,
-        Failed= 3
+        Failed= 3,
+        AwaitApproval = 4
     }
     public class Booking
     {

@@ -1,0 +1,74 @@
+﻿@model IEnumerable<Event_Management_And_Ticket_Booking_System.Models.Booking>
+
+@{
+    ViewData["Title"] = "Pending Bookings";
+}
+
+<h2 class="mb-4">Pending Bookings</h2>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        There are no bookings pending approval.
+    </div>
+}
+else
+{
+    <table class="table table-bordered table-striped">
+        <thead class="table-light">
+            <tr>
+                <th>#</th>
+                <th>Event</th>
+                <th>Attendee</th>
+                <th>Quantity</th>
+                <th>Total Amount</th>
+                <th>Status</th>
+                <th>Requested On</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int index = 1;
+            }
+            @foreach (var booking in Model)
+            {
+                <tr>
+                    <td>@index</td>
+                    <td>@booking.Event?.Title</td>
+                    <td>@booking.User?.UserName</td>
+                    <td>@booking.Quantity</td>
+                    <td>@booking.TotalAmount.ToString("C")</td>
+                    <td>
+                        @switch (booking.Status)
+                        {
+                            case BookingStatus.AwaitApproval:
+                                <span class="badge bg-warning">Awaiting Approval</span>
+                                break;
+                            case BookingStatus.Pending:
+                                <span class="badge bg-primary">Pending Payment</span>
+                                break;
+                            case BookingStatus.Confirmed:
+                                <span class="badge bg-success">Paid</span>
+                                break;
+                            case BookingStatus.Cancelled:
+                                <span class="badge bg-danger">Cancelled</span>
+                                break;
+                        }
+                    </td>
+                    <td>@booking.BookingDate:g</td>
+                    <td>
+                        @if (booking.Status == Event_Management_And_Ticket_Booking_System.Models.BookingStatus.AwaitApproval)
+                        {
+                            <form asp-action="ApproveBooking" method="post">
+                                <input type="hidden" name="bookingId" value="@booking.BookingId" />
+                                <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+                index++;
+            }
+        </tbody>
+    </table>
+}

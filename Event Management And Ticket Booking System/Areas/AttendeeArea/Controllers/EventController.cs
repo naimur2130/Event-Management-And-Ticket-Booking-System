@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace Event_Management_And_Ticket_Booking_System.Areas.AttendeeArea.Controllers
 {
@@ -40,6 +41,8 @@ namespace Event_Management_And_Ticket_Booking_System.Areas.AttendeeArea.Controll
 
         public IActionResult ShowEvents(string? searchTerm, int? categoryId, string? source)
         {
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
             var vm = new EventViewModel
             {
                 SearchTerm = searchTerm,
@@ -76,8 +79,14 @@ namespace Event_Management_And_Ticket_Booking_System.Areas.AttendeeArea.Controll
             vm.OrganizerEvents = organizerEvents.ToList();
             vm.AttendeeEvents = attendeeEvents.ToList();
 
+            // Fetch current user's bookings for all events (needed for PayNow / badges)
+            vm.UserBookings = _context.Booking
+                .Where(b => b.UserId == currentUserId)
+                .ToList();
+
             return View(vm);
         }
+
 
 
         public IActionResult AddEvents()

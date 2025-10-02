@@ -52,5 +52,29 @@ namespace Event_Management_And_Ticket_Booking_System.Areas.AdminArea.Controllers
             TempData["success"] = "Event rejected successfully!";
             return RedirectToAction("Index");
         }
+
+        public IActionResult PendingBookings()
+        {
+            var bookings = _context.Booking
+                .Include(b => b.User)
+                .Include(b => b.Event)
+                .Where(b => b.Status == BookingStatus.AwaitApproval)
+                .ToList();
+
+            return View(bookings);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ApproveBooking(int bookingId)
+        {
+            var booking = await _context.Booking.FindAsync(bookingId);
+            if (booking == null) return NotFound();
+
+            booking.Status = BookingStatus.Pending;
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("PendingBookings");
+        }
+
     }
 }

@@ -40,80 +40,70 @@ namespace Event_Management_And_Ticket_Booking_System.Areas.AttendeeArea.Controll
         }
 
         [HttpGet]
-        public async Task<IActionResult> InitiatePayment(int bookingId, string attendeesJson)
+        public async Task<IActionResult> InitiatePayment(int bookingId)
         {
             var booking = await _context.Booking
                                         .Include(b => b.Event)
+                                        .Include(b => b.User)
                                         .FirstOrDefaultAsync(b => b.BookingId == bookingId);
+
             if (booking == null) return NotFound();
 
-            // Save attendees temporarily in DB to avoid TempData issues
-            var attendees = JsonConvert.DeserializeObject<List<AttendeeForm>>(attendeesJson);
-            if (attendees != null)
-            {
-                foreach (var attendee in attendees)
-                {
-                    var tempAttendee = new TempAttendees
-                    {
-                        BookingId = bookingId,
-                        AttendeeName = attendee.AttendeeName,
-                        AttendeeEmail = attendee.AttendeeEmail,
-                        AttendeePhone = attendee.AttendeePhone
-                    };
-                    _context.TempAttendees.Add(tempAttendee);
-                }
-                await _context.SaveChangesAsync();
-            }
+            // Retrieve attendees
+            var attendees = await _context.TempAttendees
+                                          .Where(t => t.BookingId == bookingId)
+                                          .ToListAsync();
+
+            if (attendees == null || !attendees.Any())
+                return Content("No attendee information found. Cannot proceed with payment.");
 
             // Prepare payment request
             var values = new Dictionary<string, string>
-            {
-                { "store_id", storeId },
-                { "store_passwd", storePassword },
-                { "total_amount", booking.TotalAmount.ToString() },
-                { "currency", "BDT" },
-                { "tran_id", $"EVT{booking.BookingId}{DateTime.Now.Ticks}" },
-                { "success_url", $"{baseUrl}/AttendeeArea/Payment/PaymentSuccess?bookingId={booking.BookingId}" },
-                { "fail_url", $"{baseUrl}/AttendeeArea/Payment/PaymentFailed?bookingId={booking.BookingId}" },
-                { "cancel_url", $"{baseUrl}/AttendeeArea/Payment/PaymentCancelled?bookingId={booking.BookingId}" },
-                { "cus_name", User.Identity.Name ?? "Guest" },
-                { "cus_email", "example@example.com" },
-                { "cus_add1", "N/A" },
-                { "cus_city", "Dhaka" },
-                { "cus_postcode", "1000" },
-                { "cus_country", "Bangladesh" },
-                { "cus_phone", "0123456789" },
-                { "shipping_method", "NO" },
-                { "product_name", booking.Event.Title },
-                { "product_category", "Event" },
-                { "product_profile", "general" }
-            };
+    {
+        { "store_id", storeId },
+        { "store_passwd", storePassword },
+        { "total_amount", booking.TotalAmount.ToString() },
+        { "currency", "BDT" },
+        { "tran_id", $"EVT{booking.BookingId}{DateTime.Now.Ticks}" },
+        { "success_url", $"{baseUrl}/AttendeeArea/Payment/PaymentSuccess?bookingId={booking.BookingId}" },
+        { "fail_url", $"{baseUrl}/AttendeeArea/Payment/PaymentFailed?bookingId={booking.BookingId}" },
+        { "cancel_url", $"{baseUrl}/AttendeeArea/Payment/PaymentCancelled?bookingId={booking.BookingId}" },
+        { "cus_name", User.Identity.Name ?? "Guest" },
+        { "cus_email", "example@example.com" },
+        { "cus_add1", "N/A" },
+        { "cus_city", "Dhaka" },
+        { "cus_postcode", "1000" },
+        { "cus_country", "Bangladesh" },
+        { "cus_phone", "0123456789" },
+        { "shipping_method", "NO" },
+        { "product_name", booking.Event.Title },
+        { "product_category", "Event" },
+        { "product_profile", "general" }
+    };
 
             var client = _httpClientFactory.CreateClient();
             var content = new FormUrlEncodedContent(values);
             var response = await client.PostAsync(sslCommerzApiUrl, content);
             var responseString = await response.Content.ReadAsStringAsync();
 
-            Console.WriteLine(responseString);
-
             dynamic? res = JsonConvert.DeserializeObject(responseString);
             string? redirectUrl = res?.GatewayPageURL;
 
             if (!string.IsNullOrEmpty(redirectUrl))
-            {
                 return Redirect(redirectUrl);
-            }
 
             return Content("Unable to initiate payment. Please try again.");
         }
 
-        [HttpGet]
+
         [HttpGet]
         public async Task<IActionResult> PaymentSuccess(int bookingId)
         {
             var booking = await _context.Booking
                                         .Include(b => b.Event)
+                                        .Include(b => b.User)
                                         .FirstOrDefaultAsync(b => b.BookingId == bookingId);
+
             if (booking == null) return NotFound();
 
             booking.Status = BookingStatus.Confirmed;
@@ -139,12 +129,9 @@ namespace Event_Management_And_Ticket_Booking_System.Areas.AttendeeArea.Controll
                 _context.Tickets.Add(ticket);
                 tickets.Add(ticket);
             }
-
-            // Remove temp attendees after creating tickets
             _context.TempAttendees.RemoveRange(tempAttendees);
             await _context.SaveChangesAsync();
 
-            // **Send Email to all attendees**
             foreach (var ticket in tickets)
             {
                 string emailBody = $@"
@@ -156,8 +143,7 @@ namespace Event_Management_And_Ticket_Booking_System.Areas.AttendeeArea.Controll
                 <li><strong>Location:</strong> {booking.Event.EventLocation}</li>
                 <li><strong>Ticket Code:</strong> {ticket.TicketCode}</li>
             </ul>
-            <p>Thank you for booking with us!</p>
-        ";
+            <p>Thank you for booking with us!</p>";
 
                 await _emailService.SendEmailAsync(ticket.AttendeeEmail,
                                                    "Booking Confirmation - Event Ticket",
@@ -171,7 +157,6 @@ namespace Event_Management_And_Ticket_Booking_System.Areas.AttendeeArea.Controll
 
             return View("~/Areas/AttendeeArea/Views/Booking/BookingSuccess.cshtml", booking);
         }
-
 
         [HttpGet]
         public async Task<IActionResult> PaymentFailed(int bookingId)

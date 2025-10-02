@@ -156,7 +156,7 @@
     <div class="event-section">
         <div class="container py-3 mb-4">
             <form method="get" asp-action="ShowEvents" class="row g-2">
-                <input type="hidden" name="source" value="Organizer" /> 
+                <input type="hidden" name="source" value="Organizer" />
 
                 <div class="col-md-4">
                     <input type="text" name="searchTerm" value="@(Model.Source == "Organizer" ? Model.SearchTerm : "")"
@@ -198,6 +198,9 @@
                 {
                     var bgColor = cardColors[colorIndex % cardColors.Length];
                     colorIndex++;
+
+                    var booking = Model.UserBookings?.FirstOrDefault(b => b.EventId == item.EventId);
+
                     <div class="card event-card" style="background:@bgColor;">
                         <img src="@(string.IsNullOrEmpty(item.BannerImagePath) ? "~/images/no-image.png" : item.BannerImagePath)"
                              class="card-img-top" alt="@item.Title" />
@@ -207,12 +210,14 @@
                                 <h5 class="card-title mb-0">@item.Title</h5>
                                 <span class="badge badge-soft">@item.EventCategory?.CategoryName ?? "N/A"</span>
                             </div>
+
                             <p class="card-text text-muted">@item.EventDescription</p>
                             <ul class="list-unstyled small mb-2">
                                 <li><i class="bi bi-geo-alt me-1"></i>@item.EventLocation</li>
                                 <li><strong>Start:</strong> @item.EventStartUtc:g</li>
                                 <li><strong>End:</strong> @item.EventEndUtc:g</li>
                             </ul>
+
                             @{
                                 var statusClass =
                                 item.Status == Event_Management_And_Ticket_Booking_System.Models.EventStatus.Published ? "chip chip-published" :
@@ -222,7 +227,34 @@
                             <div class="mb-2">
                                 <span class="@statusClass">@item.Status</span>
                             </div>
+                            @if (booking != null)
+                            {
+                                <div class="mb-2">
+                                    @switch (booking.Status)
+                                    {
 
+                                        case BookingStatus.Pending:
+                                            <form asp-controller="Payment" asp-action="InitiatePayment" method="get">
+                                                <input type="hidden" name="bookingId" value="@booking.BookingId" />
+                                                <button type="submit" class="btn btn-primary">Pay Now</button>
+                                            </form>
+                                            break;
+                                        case BookingStatus.Confirmed:
+                                            <span class="badge bg-success">Payment Completed</span>
+                                            
+                                            break;
+                                        case BookingStatus.Cancelled:
+                                            <span class="badge bg-danger">Booking Cancelled</span>
+                                            
+                                            break;
+                                        case BookingStatus.Failed:
+                                            <span class="badge bg-danger">Payment Failed</span>
+                                            
+                                            break;
+                                        
+                                    }
+                                </div>
+                            }
                             <form asp-controller="Booking" asp-action="SelectTickets" method="post" class="mt-auto">
                                 <input type="hidden" name="EventId" value="@item.EventId" />
                                 <div class="d-flex align-items-center mb-2">
@@ -231,6 +263,7 @@
                                 </div>
                             </form>
                         </div>
+
                         <div class="card-footer text-muted small">
                             Created @item.CreatedAt:g
                         </div>
@@ -239,6 +272,7 @@
             </div>
         }
     </div>
+
 
     <div class="event-section">
 
@@ -285,6 +319,10 @@
                 {
                     var bgColor = cardColors[colorIndex % cardColors.Length];
                     colorIndex++;
+
+                    // Get current user's booking for this event
+                    var booking = Model.UserBookings?.FirstOrDefault(b => b.EventId == item.EventId);
+
                     <div class="card event-card" style="background:@bgColor;">
                         <img src="@(string.IsNullOrEmpty(item.BannerImagePath) ? "~/images/no-image.png" : item.BannerImagePath)"
                              class="card-img-top" alt="@item.Title" />
@@ -294,12 +332,14 @@
                                 <h5 class="card-title mb-0">@item.Title</h5>
                                 <span class="badge badge-soft">@item.EventCategory?.CategoryName ?? "N/A"</span>
                             </div>
+
                             <p class="card-text text-muted">@item.EventDescription</p>
                             <ul class="list-unstyled small mb-2">
                                 <li><i class="bi bi-geo-alt me-1"></i>@item.EventLocation</li>
                                 <li><strong>Start:</strong> @item.EventStartUtc:g</li>
                                 <li><strong>End:</strong> @item.EventEndUtc:g</li>
                             </ul>
+
                             @{
                                 var statusClass =
                                 item.Status == Event_Management_And_Ticket_Booking_System.Models.EventStatus.Published ? "chip chip-published" :
@@ -310,6 +350,31 @@
                                 <span class="@statusClass">@item.Status</span>
                             </div>
 
+                            <!-- Booking Status / PayNow / Awaiting Approval -->
+                            @if (booking != null)
+                            {
+                                <div class="mb-2">
+                                    @switch (booking.Status)
+                                    {
+                                        case Event_Management_And_Ticket_Booking_System.Models.BookingStatus.Pending:
+                                            <span class="badge bg-warning">Awaiting Admin Approval</span>
+                                            break;
+                                        case Event_Management_And_Ticket_Booking_System.Models.BookingStatus.Confirmed:
+                                            <span class="badge bg-success">Payment Completed</span>
+                                            break;
+                                        case Event_Management_And_Ticket_Booking_System.Models.BookingStatus.Cancelled:
+                                            <span class="badge bg-danger">Booking Cancelled</span>
+                                            break;
+                                        case Event_Management_And_Ticket_Booking_System.Models.BookingStatus.Failed:
+                                            <span class="badge bg-danger">Payment Failed</span>
+                                            break;
+                                        default:
+                                            <a asp-area="AttendeeArea" asp-controller="Payment" asp-action="InitiatePayment" asp-route-bookingId="@booking.BookingId" class="btn btn-success btn-sm">Pay Now</a>
+                                            break;
+                                    }
+                                </div>
+                            }
+
                             <form asp-controller="Booking" asp-action="SelectTickets" method="post" class="mt-auto">
                                 <input type="hidden" name="EventId" value="@item.EventId" />
                                 <div class="d-flex align-items-center mb-2">
@@ -318,6 +383,7 @@
                                 </div>
                             </form>
                         </div>
+
                         <div class="card-footer text-muted small">
                             Created @item.CreatedAt:g
                         </div>
@@ -326,5 +392,6 @@
             </div>
         }
     </div>
+
 
 </div>
